@@ -1,4 +1,5 @@
 import { startRegistration } from '@simplewebauthn/browser'
+import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/types'
 import ky from 'ky'
 import type { AuthResponse, BeginAuthRequest } from '../types'
 
@@ -44,7 +45,7 @@ export async function loginWithPasskey(username?: string): Promise<AuthResponse>
   const startBody: BeginAuthRequest = {}
   if (username) startBody.username = username
 
-  const creationOptions = await api.post('auth/start', { json: startBody }).json()
+  const creationOptions = await api.post('auth/start', { json: startBody }).json<{ publicKey: PublicKeyCredentialCreationOptionsJSON }>()
 
   // Step 2: Browser Passkey dialog
   const credential = await startRegistration({ optionsJSON: creationOptions.publicKey })
