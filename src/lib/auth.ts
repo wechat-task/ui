@@ -3,7 +3,9 @@ import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/typ
 import ky from 'ky'
 import type { AuthResponse, BeginAuthRequest } from '../types'
 
-const api = ky.create({ prefixUrl: '/api/v1' })
+const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
+
+const api = ky.create({ prefixUrl: `${API_BASE}/api/v1` })
 
 let token: string | null = null
 
@@ -19,13 +21,8 @@ export function isAuthenticated(): boolean {
   return token !== null
 }
 
-export function getAuthHeaders(): Record<string, string> {
-  if (!token) return {}
-  return { Authorization: `Bearer ${token}` }
-}
-
 const authApi = ky.create({
-  prefixUrl: '/api/v1',
+  prefixUrl: `${API_BASE}/api/v1`,
   hooks: {
     beforeRequest: [
       (request) => {
