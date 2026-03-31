@@ -38,18 +38,23 @@ const authApi = ky.create({
 export { authApi }
 
 export async function loginWithPasskey(username?: string): Promise<AuthResponse> {
-  // Step 1: Start auth - get WebAuthn challenge
+  // Step 1: Start auth - get WebAuthn challenge + session ID
   const startBody: BeginAuthRequest = {}
   if (username) startBody.username = username
 
-  const creationOptions = await api.post('auth/start', { json: startBody }).json<{ publicKey: PublicKeyCredentialCreationOptionsJSON }>()
+  const startResponse = await api.post('auth/start', { json: startBody })
+  const sessionId = startResponse.headers.get('X-Session-Id')
+  const creationOptions = await startResponse.json<{ publicKey: PublicKeyCredentialCreationOptionsJSON }>()
 
   // Step 2: Browser Passkey dialog
   const credential = await startRegistration({ optionsJSON: creationOptions.publicKey })
 
-  // Step 3: Finish auth - send credential to server
+  // Step 3: Finish auth - send credential + session ID
+  const headers: Record<string, string> = {}
+  if (sessionId) headers['X-Session-Id'] = sessionId
+
   const response = await api
-    .post('auth/finish', { json: credential })
+    .post('auth/finish', { json: credential, headers })
     .json<AuthResponse>()
 
   setToken(response.token)
