@@ -22,8 +22,8 @@ export interface Bot {
   updated_at: string
 }
 
-export interface BeginAuthRequest {
-  username?: string
+export interface RegisterOptionsRequest {
+  username: string
 }
 
 export interface AuthResponse {

@@ -1,7 +1,7 @@
-import { startRegistration } from '@simplewebauthn/browser'
-import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/types'
+import { startRegistration, startAuthentication } from '@simplewebauthn/browser'
+import type { PublicKeyCredentialCreationOptionsJSON, PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/types'
 import ky from 'ky'
-import type { AuthResponse, BeginAuthRequest } from '../types'
+import type { AuthResponse, RegisterOptionsRequest } from '../types'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
 
@@ -37,24 +37,43 @@ const authApi = ky.create({
 
 export { authApi }
 
-export async function loginWithPasskey(username?: string): Promise<AuthResponse> {
-  // Step 1: Start auth - get WebAuthn challenge + session ID
-  const startBody: BeginAuthRequest = {}
-  if (username) startBody.username = username
+interface AuthOptionsResponse<T> {
+  options: { publicKey: T }
+  session_id: string
+}
 
-  const startResponse = await api.post('auth/start', { json: startBody })
-  const sessionId = startResponse.headers.get('X-Session-Id')
-  const creationOptions = await startResponse.json<{ publicKey: PublicKeyCredentialCreationOptionsJSON }>()
+export async function registerWithPasskey(username: string): Promise<AuthResponse> {
+  // Step 1: Get registration options + session ID
+  const { options, session_id } = await api
+    .post('auth/passkey/register/options', {
+      json: { username } satisfies RegisterOptionsRequest,
+    })
+    .json<AuthOptionsResponse<PublicKeyCredentialCreationOptionsJSON>>()
 
-  // Step 2: Browser Passkey dialog
-  const credential = await startRegistration({ optionsJSON: creationOptions.publicKey })
+  // Step 2: Browser Passkey dialog (create credential)
+  const credential = await startRegistration({ optionsJSON: options.publicKey })
 
-  // Step 3: Finish auth - send credential + session ID
-  const headers: Record<string, string> = {}
-  if (sessionId) headers['X-Session-Id'] = sessionId
-
+  // Step 3: Verify registration
   const response = await api
-    .post('auth/finish', { json: credential, headers })
+    .post('auth/passkey/register/verify', { json: { ...credential, session_id } })
+    .json<AuthResponse>()
+
+  setToken(response.token)
+  return response
+}
+
+export async function loginWithPasskey(): Promise<AuthResponse> {
+  // Step 1: Get login options + session ID
+  const { options, session_id } = await api
+    .post('auth/passkey/login/options')
+    .json<AuthOptionsResponse<PublicKeyCredentialRequestOptionsJSON>>()
+
+  // Step 2: Browser Passkey dialog (authenticate)
+  const credential = await startAuthentication({ optionsJSON: options.publicKey })
+
+  // Step 3: Verify login
+  const response = await api
+    .post('auth/passkey/login/verify', { json: { ...credential, session_id } })
     .json<AuthResponse>()
 
   setToken(response.token)
