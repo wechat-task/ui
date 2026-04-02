@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { getBot, updateBot, deleteBot } from '../lib/api'
 import type { Bot } from '../types'
 import { Navbar } from '../components/Navbar'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { StatusBadge } from '../components/StatusBadge'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 
 export function BotDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  const qrcodeImage = (location.state as { qrcode_image?: string })?.qrcode_image
   const [bot, setBot] = useState<Bot | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -47,7 +51,6 @@ export function BotDetail() {
 
   const handleDelete = async () => {
     if (!bot) return
-    if (!confirm('Are you sure you want to delete this bot?')) return
     await deleteBot(bot.id)
     navigate('/dashboard')
   }
@@ -144,9 +147,15 @@ export function BotDetail() {
               <p className="text-sm text-slate-500 mb-4">
                 Scan this QR code with your WeChat to bind the bot.
               </p>
-              <div className="bg-slate-100 rounded-lg p-8 text-center">
-                <p className="text-sm text-slate-400">QR code will appear here when bot is created</p>
-              </div>
+              {qrcodeImage ? (
+                <div className="flex justify-center">
+                  <img src={qrcodeImage} alt="QR Code" className="w-48 h-48" />
+                </div>
+              ) : (
+                <div className="bg-slate-100 rounded-lg p-8 text-center">
+                  <p className="text-sm text-slate-400">QR code not available</p>
+                </div>
+              )}
             </Card>
           )}
 
@@ -156,10 +165,19 @@ export function BotDetail() {
             <p className="text-sm text-slate-500 mb-3">
               Once deleted, the bot cannot be recovered.
             </p>
-            <Button variant="danger" onClick={handleDelete}>Delete Bot</Button>
+            <Button variant="danger" onClick={() => setShowDeleteConfirm(true)}>Delete Bot</Button>
           </Card>
         </div>
       </main>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete Bot"
+        message="Are you sure you want to delete this bot? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   )
 }

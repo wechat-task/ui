@@ -1,5 +1,5 @@
 import { authApi } from './auth'
-import type { Bot, UpdateBotRequest, User } from '../types'
+import type { Bot, CreateBotResponse, UpdateBotRequest, User } from '../types'
 
 export async function getCurrentUser(): Promise<User> {
   return authApi.get('user/me').json()
@@ -17,7 +17,7 @@ export async function getBot(id: number): Promise<Bot> {
   return authApi.get(`bots/${id}`).json()
 }
 
-export async function createBot(): Promise<Bot> {
+export async function createBot(): Promise<CreateBotResponse> {
   return authApi.post('bots').json()
 }
 

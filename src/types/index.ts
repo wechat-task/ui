@@ -39,3 +39,8 @@ export interface UpdateBotRequest {
   name?: string
   description?: string
 }
+
+export interface CreateBotResponse {
+  bot: Bot
+  qrcode_image: string
+}
