@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { getBot, updateBot, deleteBot } from '../lib/api'
 import type { Bot } from '../types'
 import { Navbar } from '../components/Navbar'
@@ -7,12 +7,11 @@ import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { StatusBadge } from '../components/StatusBadge'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { QRCodeSVG } from 'qrcode.react'
 
 export function BotDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const location = useLocation()
-  const qrcodeImage = (location.state as { qrcode_image?: string })?.qrcode_image
   const [bot, setBot] = useState<Bot | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -147,9 +146,9 @@ export function BotDetail() {
               <p className="text-sm text-slate-500 mb-4">
                 Scan this QR code with your WeChat to bind the bot.
               </p>
-              {qrcodeImage ? (
+              {bot.qrcode_image ? (
                 <div className="flex justify-center">
-                  <img src={qrcodeImage} alt="QR Code" className="w-48 h-48" />
+                  <QRCodeSVG value={bot.qrcode_image} size={192} />
                 </div>
               ) : (
                 <div className="bg-slate-100 rounded-lg p-8 text-center">
