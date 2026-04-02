@@ -7,18 +7,22 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
 
 const api = ky.create({ prefixUrl: `${API_BASE}/api/v1` })
 
-let token: string | null = null
+const TOKEN_KEY = 'auth_token'
 
 export function getToken(): string | null {
-  return token
+  return localStorage.getItem(TOKEN_KEY)
 }
 
 export function setToken(t: string | null) {
-  token = t
+  if (t) {
+    localStorage.setItem(TOKEN_KEY, t)
+  } else {
+    localStorage.removeItem(TOKEN_KEY)
+  }
 }
 
 export function isAuthenticated(): boolean {
-  return token !== null
+  return getToken() !== null
 }
 
 const authApi = ky.create({
