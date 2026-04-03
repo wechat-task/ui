@@ -3,6 +3,7 @@ import { Landing } from './pages/Landing'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
 import { BotDetail } from './pages/BotDetail'
+import { Profile } from './pages/Profile'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function App() {
@@ -24,6 +25,14 @@ function App() {
           element={
             <ProtectedRoute>
               <BotDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />
