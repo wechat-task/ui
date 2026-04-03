@@ -18,6 +18,7 @@ export interface Bot {
   ilink_user_id: string
   base_url: string
   last_cursor: string
+  qrcode_image: string
   created_at: string
   updated_at: string
 }
@@ -38,4 +39,9 @@ export interface SetUsernameRequest {
 export interface UpdateBotRequest {
   name?: string
   description?: string
+}
+
+export interface CreateBotResponse {
+  bot: Bot
+  qrcode_image: string
 }

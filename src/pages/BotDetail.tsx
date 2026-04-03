@@ -6,6 +6,8 @@ import { Navbar } from '../components/Navbar'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { StatusBadge } from '../components/StatusBadge'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { QRCodeSVG } from 'qrcode.react'
 
 export function BotDetail() {
   const { id } = useParams<{ id: string }>()
@@ -16,6 +18,7 @@ export function BotDetail() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -47,7 +50,6 @@ export function BotDetail() {
 
   const handleDelete = async () => {
     if (!bot) return
-    if (!confirm('Are you sure you want to delete this bot?')) return
     await deleteBot(bot.id)
     navigate('/dashboard')
   }
@@ -144,9 +146,15 @@ export function BotDetail() {
               <p className="text-sm text-slate-500 mb-4">
                 Scan this QR code with your WeChat to bind the bot.
               </p>
-              <div className="bg-slate-100 rounded-lg p-8 text-center">
-                <p className="text-sm text-slate-400">QR code will appear here when bot is created</p>
-              </div>
+              {bot.qrcode_image ? (
+                <div className="flex justify-center">
+                  <QRCodeSVG value={bot.qrcode_image} size={192} />
+                </div>
+              ) : (
+                <div className="bg-slate-100 rounded-lg p-8 text-center">
+                  <p className="text-sm text-slate-400">QR code not available</p>
+                </div>
+              )}
             </Card>
           )}
 
@@ -156,10 +164,19 @@ export function BotDetail() {
             <p className="text-sm text-slate-500 mb-3">
               Once deleted, the bot cannot be recovered.
             </p>
-            <Button variant="danger" onClick={handleDelete}>Delete Bot</Button>
+            <Button variant="danger" onClick={() => setShowDeleteConfirm(true)}>Delete Bot</Button>
           </Card>
         </div>
       </main>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete Bot"
+        message="Are you sure you want to delete this bot? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   )
 }

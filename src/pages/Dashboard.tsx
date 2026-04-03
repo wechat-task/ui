@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { listBots, createBot } from '../lib/api'
 import type { Bot } from '../types'
 import { Navbar } from '../components/Navbar'
@@ -8,6 +8,7 @@ import { Button } from '../components/Button'
 import { StatusBadge } from '../components/StatusBadge'
 
 export function Dashboard() {
+  const navigate = useNavigate()
   const [bots, setBots] = useState<Bot[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -28,10 +29,10 @@ export function Dashboard() {
   const handleCreateBot = async () => {
     setCreating(true)
     try {
-      const bot = await createBot()
-      setBots((prev) => [...prev, bot])
-    } catch {
-      // handle error
+      const res = await createBot()
+      navigate(`/dashboard/bots/${res.bot.id}`, { state: { qrcode_image: res.qrcode_image } })
+    } catch (err) {
+      console.error('createBot error:', err)
     } finally {
       setCreating(false)
     }
