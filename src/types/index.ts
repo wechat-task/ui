@@ -45,3 +45,8 @@ export interface CreateBotResponse {
   bot: Bot
   qrcode_image: string
 }
+
+export interface UpdateProfileRequest {
+  username?: string
+  icon?: string
+}

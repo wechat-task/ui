@@ -1,12 +1,12 @@
 import { authApi } from './auth'
-import type { Bot, CreateBotResponse, UpdateBotRequest, User } from '../types'
+import type { Bot, CreateBotResponse, UpdateBotRequest, UpdateProfileRequest, User } from '../types'
 
 export async function getCurrentUser(): Promise<User> {
   return authApi.get('user/me').json()
 }
 
-export async function setUsername(username: string): Promise<User> {
-  return authApi.put('user/username', { json: { username } }).json()
+export async function updateProfile(data: UpdateProfileRequest): Promise<User> {
+  return authApi.put('user/profile', { json: data }).json()
 }
 
 export async function listBots(): Promise<Bot[]> {
