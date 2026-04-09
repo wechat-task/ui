@@ -6,11 +6,13 @@ import { Navbar } from '../components/Navbar'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { StatusBadge } from '../components/StatusBadge'
+import { CreateBotDialog } from '../components/CreateBotDialog'
 
 export function Dashboard() {
   const navigate = useNavigate()
   const [bots, setBots] = useState<Bot[]>([])
   const [loading, setLoading] = useState(true)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [creating, setCreating] = useState(false)
 
   useEffect(() => {
@@ -26,11 +28,11 @@ export function Dashboard() {
     }
   }
 
-  const handleCreateBot = async () => {
+  const handleCreateBot = async (name: string, description: string) => {
     setCreating(true)
     try {
-      const res = await createBot()
-      navigate(`/dashboard/bots/${res.bot.id}`, { state: { qrcode_image: res.qrcode_image } })
+      const bot = await createBot({ name, description: description || undefined })
+      navigate(`/dashboard/bots/${bot.id}`)
     } catch (err) {
       console.error('createBot error:', err)
     } finally {
@@ -44,19 +46,15 @@ export function Dashboard() {
       <main className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-semibold text-slate-900">My Bots</h1>
-          <Button onClick={handleCreateBot} disabled={creating}>
-            {creating ? 'Creating...' : '+ Add Bot'}
-          </Button>
+          <Button onClick={() => setShowCreateDialog(true)}>+ Add Bot</Button>
         </div>
 
         {loading ? (
           <p className="text-sm text-slate-400">Loading...</p>
         ) : bots.length === 0 ? (
           <Card className="text-center py-12">
-            <p className="text-slate-500 mb-4">No bots yet. Add your first bot to get started.</p>
-            <Button onClick={handleCreateBot} disabled={creating}>
-              {creating ? 'Creating...' : '+ Add Bot'}
-            </Button>
+            <p className="text-slate-500 mb-4">No bots yet. Create your first bot to get started.</p>
+            <Button onClick={() => setShowCreateDialog(true)}>+ Add Bot</Button>
           </Card>
         ) : (
           <div className="grid gap-4">
@@ -71,6 +69,15 @@ export function Dashboard() {
                       {bot.description && (
                         <p className="text-sm text-slate-500 mt-1">{bot.description}</p>
                       )}
+                      {bot.channels && bot.channels.length > 0 && (
+                        <div className="flex gap-1.5 mt-2">
+                          {bot.channels.map((ch) => (
+                            <span key={ch.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-slate-100 text-slate-600">
+                              {ch.type === 'wechat_clawbot' ? 'WeChat' : 'Lark'}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <StatusBadge status={bot.status} />
                   </div>
@@ -80,6 +87,13 @@ export function Dashboard() {
           </div>
         )}
       </main>
+
+      <CreateBotDialog
+        open={showCreateDialog}
+        onConfirm={handleCreateBot}
+        onCancel={() => setShowCreateDialog(false)}
+        loading={creating}
+      />
     </div>
   )
 }

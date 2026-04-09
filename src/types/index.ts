@@ -14,11 +14,26 @@ export interface Bot {
   name: string
   description: string
   status: BotStatus
-  ilink_bot_id: string
-  ilink_user_id: string
-  base_url: string
+  channels: Channel[]
+  created_at: string
+  updated_at: string
+}
+
+export type ChannelType = 'wechat_clawbot' | 'lark'
+
+export type ChannelStatus = 'pending' | 'active' | 'disconnected' | 'expired'
+
+export interface ChannelConfig {
+  [key: string]: unknown
+}
+
+export interface Channel {
+  id: number
+  bot_id: number
+  type: ChannelType
+  status: ChannelStatus
+  config: ChannelConfig
   last_cursor: string
-  qrcode_image: string
   created_at: string
   updated_at: string
 }
@@ -32,18 +47,14 @@ export interface AuthResponse {
   user: User
 }
 
-export interface SetUsernameRequest {
-  username: string
+export interface CreateBotRequest {
+  name: string
+  description?: string
 }
 
 export interface UpdateBotRequest {
   name?: string
   description?: string
-}
-
-export interface CreateBotResponse {
-  bot: Bot
-  qrcode_image: string
 }
 
 export interface UpdateProfileRequest {
