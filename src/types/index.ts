@@ -57,6 +57,11 @@ export interface UpdateBotRequest {
   description?: string
 }
 
+export interface CreateLarkChannelRequest {
+  webhook_url: string
+  secret?: string
+}
+
 export interface UpdateProfileRequest {
   username?: string
   icon?: string

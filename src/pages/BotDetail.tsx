@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getBot, updateBot, deleteBot, createWechatChannel, deleteChannel } from '../lib/api'
+import { getBot, updateBot, deleteBot, createWechatChannel, createLarkChannel, deleteChannel } from '../lib/api'
 import type { Bot, Channel, ChannelType } from '../types'
 import { Navbar } from '../components/Navbar'
 import { Card } from '../components/Card'
@@ -30,6 +30,10 @@ export function BotDetail() {
   const [connectingWechat, setConnectingWechat] = useState(false)
   const [qrcodeData, setQrcodeData] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [showLarkDialog, setShowLarkDialog] = useState(false)
+  const [larkWebhookUrl, setLarkWebhookUrl] = useState('')
+  const [larkSecret, setLarkSecret] = useState('')
+  const [connectingLark, setConnectingLark] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -118,6 +122,27 @@ export function BotDetail() {
       console.error('createWechatChannel error:', err)
     } finally {
       setConnectingWechat(false)
+    }
+  }
+
+  const handleConnectLark = async () => {
+    if (!bot) return
+    setConnectingLark(true)
+    setError(null)
+    try {
+      await createLarkChannel(bot.id, {
+        webhook_url: larkWebhookUrl.trim(),
+        secret: larkSecret.trim() || undefined,
+      })
+      setShowLarkDialog(false)
+      setLarkWebhookUrl('')
+      setLarkSecret('')
+      await loadBot()
+    } catch (err) {
+      setError('Failed to create Lark channel. Please check the webhook URL.')
+      console.error('createLarkChannel error:', err)
+    } finally {
+      setConnectingLark(false)
     }
   }
 
@@ -267,7 +292,7 @@ export function BotDetail() {
                       Disconnect
                     </Button>
                   ) : (
-                    <Button variant="secondary" disabled>
+                    <Button onClick={() => setShowLarkDialog(true)}>
                       Connect
                     </Button>
                   )}
@@ -318,6 +343,48 @@ export function BotDetail() {
           onConfirm={() => handleDeleteChannel(showDeleteChannelConfirm)}
           onCancel={() => setShowDeleteChannelConfirm(null)}
         />
+      )}
+
+      {/* Lark Connect Dialog */}
+      {showLarkDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setShowLarkDialog(false)} />
+          <div className="relative bg-white rounded-lg shadow-lg border border-slate-200 w-full max-w-md mx-4 p-6">
+            <h3 className="text-base font-semibold text-slate-900 mb-4">Connect Lark</h3>
+            <div className="space-y-3 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Webhook URL <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={larkWebhookUrl}
+                  onChange={(e) => setLarkWebhookUrl(e.target.value)}
+                  placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/xxx"
+                  autoFocus
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Secret <span className="text-slate-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  value={larkSecret}
+                  onChange={(e) => setLarkSecret(e.target.value)}
+                  placeholder="Signing secret"
+                  type="password"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => { setShowLarkDialog(false); setLarkWebhookUrl(''); setLarkSecret('') }}>Cancel</Button>
+              <Button onClick={handleConnectLark} disabled={!larkWebhookUrl.trim() || connectingLark}>
+                {connectingLark ? 'Connecting...' : 'Connect'}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
