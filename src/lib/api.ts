@@ -1,5 +1,5 @@
 import { authApi } from './auth'
-import type { Bot, Channel, CreateBotRequest, UpdateBotRequest, UpdateProfileRequest, User } from '../types'
+import type { Bot, Channel, CreateBotRequest, CreateLarkChannelRequest, UpdateBotRequest, UpdateProfileRequest, User } from '../types'
 
 // User
 export async function getCurrentUser(): Promise<User> {
@@ -38,6 +38,10 @@ export async function listChannels(botId: number): Promise<Channel[]> {
 
 export async function createWechatChannel(botId: number): Promise<Channel & { qrcode_image?: string }> {
   return authApi.post(`bots/${botId}/channels/wechat-clawbot`).json()
+}
+
+export async function createLarkChannel(botId: number, data: CreateLarkChannelRequest): Promise<Channel> {
+  return authApi.post(`bots/${botId}/channels/lark`, { json: data }).json()
 }
 
 export async function deleteChannel(botId: number, channelId: number): Promise<void> {
