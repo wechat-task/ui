@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getBot, updateBot, deleteBot, createWechatChannel, deleteChannel } from '../lib/api'
 import type { Bot, Channel, ChannelType } from '../types'
@@ -35,6 +35,43 @@ export function BotDetail() {
     if (!id) return
     loadBot()
   }, [id])
+
+  // Poll channel status when wechat channel is pending
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    const wechat = bot?.channels?.find((c) => c.type === 'wechat_clawbot')
+    if (wechat?.status === 'pending' && id) {
+      if (pollRef.current) return
+      pollRef.current = setInterval(async () => {
+        try {
+          const data = await getBot(Number(id))
+          setBot(data)
+          const updatedWechat = data.channels?.find((c) => c.type === 'wechat_clawbot')
+          if (updatedWechat && updatedWechat.status !== 'pending') {
+            setQrcodeData(null)
+            if (pollRef.current) {
+              clearInterval(pollRef.current)
+              pollRef.current = null
+            }
+          }
+        } catch {
+          // ignore poll errors
+        }
+      }, 5000)
+    } else {
+      if (pollRef.current) {
+        clearInterval(pollRef.current)
+        pollRef.current = null
+      }
+    }
+    return () => {
+      if (pollRef.current) {
+        clearInterval(pollRef.current)
+        pollRef.current = null
+      }
+    }
+  }, [bot?.channels, id])
 
   const loadBot = async () => {
     try {
