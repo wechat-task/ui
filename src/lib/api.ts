@@ -1,5 +1,5 @@
 import { authApi } from './auth'
-import type { Bot, Channel, CreateBotRequest, CreateLarkChannelRequest, UpdateBotRequest, UpdateProfileRequest, User } from '../types'
+import type { Bot, Channel, CreateBotRequest, CreateLarkChannelRequest, SendMessageRequest, UpdateBotRequest, UpdateProfileRequest, User } from '../types'
 
 // User
 export async function getCurrentUser(): Promise<User> {
@@ -46,4 +46,8 @@ export async function createLarkChannel(botId: number, data: CreateLarkChannelRe
 
 export async function deleteChannel(botId: number, channelId: number): Promise<void> {
   await authApi.delete(`bots/${botId}/channels/${channelId}`)
+}
+
+export async function sendMessage(botId: number, channelId: number, data: SendMessageRequest): Promise<void> {
+  await authApi.post(`bots/${botId}/channels/${channelId}/send`, { json: data })
 }

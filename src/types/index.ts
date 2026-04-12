@@ -62,6 +62,10 @@ export interface CreateLarkChannelRequest {
   secret?: string
 }
 
+export interface SendMessageRequest {
+  text: string
+}
+
 export interface UpdateProfileRequest {
   username?: string
   icon?: string

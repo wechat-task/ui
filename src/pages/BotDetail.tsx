@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getBot, updateBot, deleteBot, createWechatChannel, createLarkChannel, deleteChannel } from '../lib/api'
+import { HTTPError } from 'ky'
+import { getBot, updateBot, deleteBot, createWechatChannel, createLarkChannel, deleteChannel, sendMessage } from '../lib/api'
 import type { Bot, Channel, ChannelType } from '../types'
 import { Navbar } from '../components/Navbar'
 import { Card } from '../components/Card'
@@ -34,6 +35,10 @@ export function BotDetail() {
   const [larkWebhookUrl, setLarkWebhookUrl] = useState('')
   const [larkSecret, setLarkSecret] = useState('')
   const [connectingLark, setConnectingLark] = useState(false)
+  const [messageText, setMessageText] = useState<Record<number, string>>({})
+  const [sendingMessage, setSendingMessage] = useState<number | null>(null)
+  const [messageError, setMessageError] = useState<Record<number, string>>({})
+  const [messageSuccess, setMessageSuccess] = useState<Record<number, string>>({})
 
   useEffect(() => {
     if (!id) return
@@ -156,6 +161,38 @@ export function BotDetail() {
       console.error('deleteChannel error:', err)
     }
     setShowDeleteChannelConfirm(null)
+  }
+
+  const handleSendMessage = async (channel: Channel) => {
+    if (!bot) return
+    const text = messageText[channel.id]?.trim()
+    if (!text) return
+    setSendingMessage(channel.id)
+    setMessageError((prev) => ({ ...prev, [channel.id]: '' }))
+    setMessageSuccess((prev) => ({ ...prev, [channel.id]: '' }))
+    try {
+      await sendMessage(bot.id, channel.id, { text })
+      setMessageText((prev) => ({ ...prev, [channel.id]: '' }))
+      setMessageSuccess((prev) => ({ ...prev, [channel.id]: 'Message sent' }))
+      setTimeout(() => {
+        setMessageSuccess((prev) => ({ ...prev, [channel.id]: '' }))
+      }, 3000)
+    } catch (err: unknown) {
+      let msg = 'Failed to send message'
+      if (err instanceof HTTPError) {
+        try {
+          const body = await err.response.json() as Record<string, string>
+          msg = body.error || body.message || err.message
+        } catch {
+          msg = err.message
+        }
+      } else if (err instanceof Error) {
+        msg = err.message
+      }
+      setMessageError((prev) => ({ ...prev, [channel.id]: msg }))
+    } finally {
+      setSendingMessage(null)
+    }
   }
 
   if (loading) {
@@ -310,6 +347,56 @@ export function BotDetail() {
               </p>
               <div className="flex justify-center">
                 <QRCodeSVG value={qrcodeData} size={192} />
+              </div>
+            </Card>
+          )}
+
+          {/* Send Message */}
+          {channels.filter((c) => c.status === 'active').length > 0 && (
+            <Card>
+              <h2 className="text-sm font-medium text-slate-900 mb-4">Send Message</h2>
+              <p className="text-sm text-slate-500 mb-4">
+                Send a test message to an active channel.
+              </p>
+              <div className="space-y-3">
+                {channels.filter((c) => c.status === 'active').map((channel) => (
+                  <div key={channel.id}>
+                    <div className="flex gap-2">
+                      <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-slate-100 text-slate-600 whitespace-nowrap self-center">
+                        {CHANNEL_INFO[channel.type].label}
+                      </span>
+                      <input
+                        value={messageText[channel.id] || ''}
+                        onChange={(e) => {
+                          setMessageText((prev) => ({ ...prev, [channel.id]: e.target.value }))
+                          if (messageError[channel.id]) {
+                            setMessageError((prev) => ({ ...prev, [channel.id]: '' }))
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey && messageText[channel.id]?.trim()) {
+                            e.preventDefault()
+                            handleSendMessage(channel)
+                          }
+                        }}
+                        placeholder="Type a message..."
+                        className="flex-1 px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                      />
+                      <Button
+                        onClick={() => handleSendMessage(channel)}
+                        disabled={!messageText[channel.id]?.trim() || sendingMessage === channel.id}
+                      >
+                        {sendingMessage === channel.id ? 'Sending...' : 'Send'}
+                      </Button>
+                    </div>
+                    {messageError[channel.id] && (
+                      <p className="text-xs text-red-600 mt-1 ml-12">{messageError[channel.id]}</p>
+                    )}
+                    {messageSuccess[channel.id] && (
+                      <p className="text-xs text-emerald-600 mt-1 ml-12">{messageSuccess[channel.id]}</p>
+                    )}
+                  </div>
+                ))}
               </div>
             </Card>
           )}
