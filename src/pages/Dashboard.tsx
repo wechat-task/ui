@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { listBots, createBot } from '../lib/api'
 import type { Bot } from '../types'
-import { Navbar } from '../components/Navbar'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 import { StatusBadge } from '../components/StatusBadge'
@@ -41,52 +40,49 @@ export function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar />
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-semibold text-slate-900">My Bots</h1>
-          <Button onClick={() => setShowCreateDialog(true)}>+ Add Bot</Button>
-        </div>
+    <>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl font-semibold text-slate-900">My Bots</h1>
+        <Button onClick={() => setShowCreateDialog(true)}>+ Add Bot</Button>
+      </div>
 
-        {loading ? (
-          <p className="text-sm text-slate-400">Loading...</p>
-        ) : bots.length === 0 ? (
-          <Card className="text-center py-12">
-            <p className="text-slate-500 mb-4">No bots yet. Create your first bot to get started.</p>
-            <Button onClick={() => setShowCreateDialog(true)}>+ Add Bot</Button>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {bots.map((bot) => (
-              <Link key={bot.id} to={`/dashboard/bots/${bot.id}`}>
-                <Card className="hover:border-slate-300 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-slate-900">
-                        {bot.name || `Bot #${bot.id}`}
-                      </h3>
-                      {bot.description && (
-                        <p className="text-sm text-slate-500 mt-1">{bot.description}</p>
-                      )}
-                      {bot.channels && bot.channels.length > 0 && (
-                        <div className="flex gap-1.5 mt-2">
-                          {bot.channels.map((ch) => (
-                            <span key={ch.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-slate-100 text-slate-600">
-                              {ch.type === 'wechat_clawbot' ? 'WeChat' : 'Lark'}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <StatusBadge status={bot.status} />
+      {loading ? (
+        <p className="text-sm text-slate-400">Loading...</p>
+      ) : bots.length === 0 ? (
+        <Card className="text-center py-12">
+          <p className="text-slate-500 mb-4">No bots yet. Create your first bot to get started.</p>
+          <Button onClick={() => setShowCreateDialog(true)}>+ Add Bot</Button>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {bots.map((bot) => (
+            <Link key={bot.id} to={`bots/${bot.id}`}>
+              <Card className="hover:border-slate-300 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium text-slate-900">
+                      {bot.name || `Bot #${bot.id}`}
+                    </h3>
+                    {bot.description && (
+                      <p className="text-sm text-slate-500 mt-1">{bot.description}</p>
+                    )}
+                    {bot.channels && bot.channels.length > 0 && (
+                      <div className="flex gap-1.5 mt-2">
+                        {bot.channels.map((ch) => (
+                          <span key={ch.id} className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-slate-100 text-slate-600">
+                            {ch.type === 'wechat_clawbot' ? 'WeChat' : 'Lark'}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
-      </main>
+                  <StatusBadge status={bot.status} />
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
 
       <CreateBotDialog
         open={showCreateDialog}
@@ -94,6 +90,6 @@ export function Dashboard() {
         onCancel={() => setShowCreateDialog(false)}
         loading={creating}
       />
-    </div>
+    </>
   )
 }

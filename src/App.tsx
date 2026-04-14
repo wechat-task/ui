@@ -1,10 +1,12 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Landing } from './pages/Landing'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
 import { BotDetail } from './pages/BotDetail'
 import { Profile } from './pages/Profile'
+import { DashboardLayout } from './components/DashboardLayout'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { SkillManagement } from './pages/SkillManagement'
 
 function App() {
   return (
@@ -16,26 +18,16 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardLayout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/dashboard/bots/:id"
-          element={
-            <ProtectedRoute>
-              <BotDetail />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route index element={<Navigate to="bots" replace />} />
+          <Route path="bots" element={<Dashboard />} />
+          <Route path="skills" element={<SkillManagement />} />
+          <Route path="bots/:id" element={<BotDetail />} />
+          <Route path="profile" element={<Profile />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )
