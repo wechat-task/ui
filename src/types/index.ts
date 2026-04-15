@@ -161,8 +161,8 @@ export interface UpdateSkillRequest {
 }
 
 export interface SubscribeToSkillRequest {
-  bot_id: number
-  channel_id: number
+  bot_id?: number
+  channel_id?: number
   schedule_cron?: string
   time_zone?: string
   config?: SkillExecutionConfig
