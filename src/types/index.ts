@@ -70,3 +70,113 @@ export interface UpdateProfileRequest {
   username?: string
   icon?: string
 }
+
+// Skill types
+export type SkillStatus = 'draft' | 'published' | 'archived'
+
+export type SkillVisibility = 'private' | 'public' | 'unlisted'
+
+export interface SkillParameter {
+  default?: any
+  description?: string
+  enum_values?: string[]
+  required?: boolean
+  type?: string
+}
+
+export interface SkillParameters {
+  [key: string]: SkillParameter
+}
+
+export interface LLMConfig {
+  api_key?: string
+  base_url?: string
+  max_tokens?: number
+  model?: string
+  provider?: string
+  temperature?: number
+}
+
+export interface SkillExecutionConfig {
+  llm_config?: LLMConfig
+  parameters?: Record<string, any>
+}
+
+export interface Skill {
+  id: number
+  user_id: number
+  name: string
+  description?: string
+  category?: string
+  content: string
+  status: SkillStatus
+  visibility: SkillVisibility
+  parameters?: SkillParameters
+  version?: string
+  tags?: string[]
+  execution_count?: number
+  subscriber_count?: number
+  created_at: string
+  updated_at: string
+}
+
+export interface SkillSubscription {
+  id: number
+  user_id: number
+  skill_id: number
+  bot_id: number
+  channel_id: number
+  status: string
+  schedule_cron?: string
+  time_zone?: string
+  next_run_at?: string
+  config?: SkillExecutionConfig
+  created_at: string
+  updated_at: string
+  skill?: Skill
+  bot?: Bot
+  channel?: Channel
+}
+
+export interface CreateSkillRequest {
+  name: string
+  description?: string
+  category?: string
+  content: string
+  status?: SkillStatus
+  visibility?: SkillVisibility
+  parameters?: SkillParameters
+  tags?: string[]
+}
+
+export interface UpdateSkillRequest {
+  name?: string
+  description?: string
+  category?: string
+  content?: string
+  status?: SkillStatus
+  visibility?: SkillVisibility
+  parameters?: SkillParameters
+  tags?: string[]
+}
+
+export interface SubscribeToSkillRequest {
+  bot_id: number
+  channel_id: number
+  schedule_cron?: string
+  time_zone?: string
+  config?: SkillExecutionConfig
+}
+
+export interface SearchSkillsRequest {
+  q?: string
+  page?: number
+  size?: number
+}
+
+export interface SearchSkillsResponse {
+  data: Skill[]
+  total: number
+  page: number
+  size: number
+}
