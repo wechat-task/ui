@@ -112,10 +112,6 @@ export interface Skill {
   status: SkillStatus
   visibility: SkillVisibility
   parameters?: SkillParameters
-  schedule_cron?: string
-  max_tokens?: number
-  is_free?: boolean
-  uses_system_llm?: boolean
   version?: string
   tags?: string[]
   execution_count?: number
@@ -147,13 +143,9 @@ export interface CreateSkillRequest {
   description?: string
   category?: string
   content: string
+  status?: SkillStatus
   visibility?: SkillVisibility
   parameters?: SkillParameters
-  schedule_cron?: string
-  max_tokens?: number
-  is_free?: boolean
-  uses_system_llm?: boolean
-  version?: string
   tags?: string[]
 }
 
@@ -162,13 +154,9 @@ export interface UpdateSkillRequest {
   description?: string
   category?: string
   content?: string
+  status?: SkillStatus
   visibility?: SkillVisibility
   parameters?: SkillParameters
-  schedule_cron?: string
-  max_tokens?: number
-  is_free?: boolean
-  uses_system_llm?: boolean
-  version?: string
   tags?: string[]
 }
 
@@ -181,9 +169,14 @@ export interface SubscribeToSkillRequest {
 }
 
 export interface SearchSkillsRequest {
-  query?: string
-  category?: string
-  visibility?: SkillVisibility
-  limit?: number
-  offset?: number
+  q?: string
+  page?: number
+  size?: number
+}
+
+export interface SearchSkillsResponse {
+  data: Skill[]
+  total: number
+  page: number
+  size: number
 }

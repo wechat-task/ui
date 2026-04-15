@@ -1,5 +1,5 @@
 import { authApi } from './auth'
-import type { Bot, Channel, CreateBotRequest, CreateLarkChannelRequest, SendMessageRequest, UpdateBotRequest, UpdateProfileRequest, User, Skill, SkillSubscription, CreateSkillRequest, UpdateSkillRequest, SubscribeToSkillRequest, SearchSkillsRequest } from '../types'
+import type { Bot, Channel, CreateBotRequest, CreateLarkChannelRequest, SendMessageRequest, UpdateBotRequest, UpdateProfileRequest, User, Skill, SkillSubscription, CreateSkillRequest, UpdateSkillRequest, SubscribeToSkillRequest, SearchSkillsRequest, SearchSkillsResponse } from '../types'
 
 // User
 export async function getCurrentUser(): Promise<User> {
@@ -73,13 +73,11 @@ export async function deleteSkill(id: number): Promise<void> {
   await authApi.delete(`skills/${id}`)
 }
 
-export async function searchSkills(data: SearchSkillsRequest): Promise<Skill[]> {
+export async function searchSkills(data: SearchSkillsRequest): Promise<SearchSkillsResponse> {
   const params = new URLSearchParams()
-  if (data.query) params.append('query', data.query)
-  if (data.category) params.append('category', data.category)
-  if (data.visibility) params.append('visibility', data.visibility)
-  if (data.limit) params.append('limit', data.limit.toString())
-  if (data.offset) params.append('offset', data.offset.toString())
+  if (data.q) params.append('q', data.q)
+  if (data.page) params.append('page', data.page.toString())
+  if (data.size) params.append('size', data.size.toString())
   return authApi.get(`skills/search?${params.toString()}`).json()
 }
 
