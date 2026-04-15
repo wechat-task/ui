@@ -6,7 +6,9 @@ import { BotDetail } from './pages/BotDetail'
 import { Profile } from './pages/Profile'
 import { DashboardLayout } from './components/DashboardLayout'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { SkillManagement } from './pages/SkillManagement'
+import { SkillPlaza } from './pages/SkillPlaza'
+import { MySubscriptions } from './pages/MySubscriptions'
+import { MySkills } from './pages/MySkills'
 
 function App() {
   return (
@@ -24,8 +26,11 @@ function App() {
         >
           <Route index element={<Navigate to="bots" replace />} />
           <Route path="bots" element={<Dashboard />} />
-          <Route path="skills" element={<SkillManagement />} />
           <Route path="bots/:id" element={<BotDetail />} />
+          <Route path="skills" element={<Navigate to="plaza" replace />} />
+          <Route path="skills/plaza" element={<SkillPlaza />} />
+          <Route path="skills/subscriptions" element={<MySubscriptions />} />
+          <Route path="skills/me" element={<MySkills />} />
           <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>

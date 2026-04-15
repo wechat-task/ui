@@ -73,6 +73,14 @@ export async function deleteSkill(id: number): Promise<void> {
   await authApi.delete(`skills/${id}`)
 }
 
+export async function publishSkill(id: number): Promise<Skill> {
+  return authApi.post(`skills/${id}/publish`).json()
+}
+
+export async function archiveSkill(id: number): Promise<Skill> {
+  return authApi.post(`skills/${id}/archive`).json()
+}
+
 export async function searchSkills(data: SearchSkillsRequest): Promise<SearchSkillsResponse> {
   const params = new URLSearchParams()
   if (data.q) params.append('q', data.q)
