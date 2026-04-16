@@ -145,6 +145,7 @@ export interface CreateSkillRequest {
   content: string
   status?: SkillStatus
   visibility?: SkillVisibility
+  version?: string
   parameters?: SkillParameters
   tags?: string[]
 }
@@ -156,6 +157,7 @@ export interface UpdateSkillRequest {
   content?: string
   status?: SkillStatus
   visibility?: SkillVisibility
+  version?: string
   parameters?: SkillParameters
   tags?: string[]
 }
