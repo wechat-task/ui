@@ -21,6 +21,7 @@ export function CreateEditSkillDialog({ skill, onConfirm, onCancel, loading }: C
   const [content, setContent] = useState('')
   const [visibility, setVisibility] = useState<SkillVisibility>('private')
   const [tags, setTags] = useState('')
+  const [version, setVersion] = useState('1.0.0')
 
   useEffect(() => {
     if (skill) {
@@ -30,6 +31,7 @@ export function CreateEditSkillDialog({ skill, onConfirm, onCancel, loading }: C
       setContent(skill.content)
       setVisibility(skill.visibility)
       setTags(skill.tags?.join(', ') || '')
+      setVersion(skill.version || '1.0.0')
     } else {
       setName('')
       setDescription('')
@@ -37,6 +39,7 @@ export function CreateEditSkillDialog({ skill, onConfirm, onCancel, loading }: C
       setContent('')
       setVisibility('private')
       setTags('')
+      setVersion('1.0.0')
     }
   }, [skill])
 
@@ -46,6 +49,7 @@ export function CreateEditSkillDialog({ skill, onConfirm, onCancel, loading }: C
     category: category.trim() || undefined,
     content: content.trim(),
     visibility,
+    version: version.trim() || undefined,
     tags: tags.trim() ? tags.split(',').map(t => t.trim()).filter(t => t) : undefined,
   })
 
@@ -65,7 +69,7 @@ export function CreateEditSkillDialog({ skill, onConfirm, onCancel, loading }: C
       </h3>
 
       <div className="space-y-4 mb-6">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Skill Name *</label>
             <input
@@ -85,6 +89,17 @@ export function CreateEditSkillDialog({ skill, onConfirm, onCancel, loading }: C
               onChange={(e) => setCategory(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="e.g. Productivity, News, Analytics"
+              disabled={isPublished}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Version</label>
+            <input
+              value={version}
+              onChange={(e) => setVersion(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="1.0.0"
               disabled={isPublished}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200"
             />
